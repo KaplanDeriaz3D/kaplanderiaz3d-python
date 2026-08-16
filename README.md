@@ -11,7 +11,7 @@ Built as part of a Master's Thesis (TFM) on hydraulic machinery design. See [kap
 
 **Turbine hydraulic design**
 - Supports both **Kaplan** (axial-flow) and **Deriaz** (diagonal-flow) runner types, switchable from a single interface.
-- Computes the full blade backbone from operating parameters: rotational speed (RPM), rotation direction, flow rate, net head, gravity, fluid density, hydraulic/volumetric/mechanical efficiencies, and cavitation coefficient (σ).
+- Computes the full blade backbone from operating parameters: rotational speed (RPM), rotation direction, flow rate, net head, gravity, fluid density, hydraulic/volumetric/mechanical efficiencies, and solidity coefficient (σ).
 - Configurable interpolation scheme for blade geometry along the radial stations.
 - Geometry inputs specific to each turbine type (Kaplan hub/tip radius, blade length; Deriaz-specific parameters).
 
