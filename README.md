@@ -16,7 +16,7 @@ Built as part of a Master's Thesis (TFM) on hydraulic machinery design. See [kap
 - Geometry inputs specific to each turbine type (Kaplan hub/tip radius, blade length; Deriaz-specific parameters).
 
 **Hydrofoil & 3D mesh generation**
-- Generates NACA-based hydrofoil profiles per radial station, with configurable number of points, thickness/chord ratio, and number of radial stations.
+- Generates NACA-based (among others) hydrofoil profiles per radial station, with configurable number of points, thickness/chord ratio, and number of radial stations.
 - Builds a full **solid 3D blade** (not just a mean surface), computing surface normals and thickness direction for a manufacturable geometry.
 - Advanced meshing options for finer control over the generated surface.
 
