@@ -2,6 +2,9 @@
 
 <img width="1920" height="994" alt="image" src="https://github.com/user-attachments/assets/dede5028-0404-4fb4-bb42-24aaf390ea2d" />
 
+<img width="1918" height="948" alt="image" src="https://github.com/user-attachments/assets/46a2c685-c767-4ac7-8a26-f4d6e44b1afe" />
+
+
 
 A Python/PySide6 + PyVista port of the original MATLAB App Designer application, for designing runner blades of **Kaplan** (axial-flow) and **Deriaz** (diagonal-flow) hydraulic turbines — no MATLAB license required.
 
