@@ -24,6 +24,7 @@ with no industrial post-processing adjustments.
 4. [The Hydrodynamic Model, Step by Step](#4-the-hydrodynamic-model-step-by-step)
 5. [Hydrofoil / Mesh Tab](#5-hydrofoil--mesh-tab)
 6. [The Hydrofoil Profile Formulas, Explicitly](#6-the-hydrofoil-profile-formulas-explicitly)
+   - [6.1 What "thickness direction" actually is](#61-what-thickness-direction-actually-is)
 7. [Export Tab](#7-export-tab)
 8. [3D Visualization Panel](#8-3d-visualization-panel)
 9. [Results Table, With Every Formula](#9-results-table-with-every-formula)
@@ -346,15 +347,37 @@ numbers become the camber line.
 
 ## 6. The Hydrofoil Profile Formulas, Explicitly
 
-`generate_hydro_profile()` returns a camber line `yc(x)` and a
-half-thickness distribution `yt(x)`, as functions of the normalized
-chordwise position `x` in [0, 1], for one radial station. Two quantities
-taper across the span first:
+Before the profile formulas themselves, one conversion step matters and
+is easy to miss: **the "Max Rel. Thickness (t/c)" you set in the GUI is
+not used directly, station by station.** `build_solid_blade()` first
+fixes an *absolute* reference thickness from the HUB chord alone, then
+re-derives a *local* relative thickness for every other station from
+that fixed absolute value and that station's own chord length, and only
+*then* applies the hub-to-tip taper you actually control:
 
 ```
-r_star   = i_radio / (N_radios - 1)                      (0 at hub, 1 at tip)
-t_c      = t_c_base * (1 - (1 - hub_to_tip_ratio)*r_star) (linear thickness taper)
-m_factor = (1 - r_star)^1.5                               (camber taper toward the tip)
+t_abs_ref      = t_rel_input * c_hub          (fixed once, from the hub chord)
+t_rel_local(i) = t_abs_ref / c_i              (re-relativized to station i's own chord)
+```
+
+The effect: if two stations happened to have the *same* chord length,
+`t_rel_local` would be identical between them regardless of any chord
+differences elsewhere on the blade — the absolute (metric) thickness
+tracks the chord automatically, station by station, rather than the
+input `t/c` being applied as a flat percentage everywhere. `t_rel_local`
+is what actually gets passed into `generate_hydro_profile()` as `t_c_base`
+below — **not** the raw GUI input.
+
+`generate_hydro_profile()` then returns a camber line `yc(x)` and a
+half-thickness distribution `yt(x)`, as functions of the normalized
+chordwise position `x` in [0, 1], for one radial station. This is where
+the hub-to-tip taper you set in the GUI is actually applied, on top of
+the re-relativization above:
+
+```
+r_star   = i_radio / (N_radios - 1)                           (0 at hub, 1 at tip)
+t_c      = t_rel_local * (1 - (1 - hub_to_tip_ratio)*r_star)   (your taper, applied here)
+m_factor = (1 - r_star)^1.5                                    (camber taper toward the tip)
 ```
 
 The standard 4-digit NACA thickness formula, used by three of the five
@@ -385,11 +408,72 @@ for x < p:  yc(x) = (m/p²)   * (2*p*x - x²)
 for x >= p: yc(x) = (m/(1-p)²) * ((1-2p) + 2*p*x - x²)
 ```
 
-Once `yc` and `yt` are known at a station, `build_solid_blade()` places
-the extrados (pressure side) and intrados (suction side) surfaces at
-`mean_surface ± (yc·c_i + yt·c_i)` along the local thickness direction
-(camber shifts both sides together, thickness pushes them apart), where
-`c_i` is that station's own chord length.
+Once `yc` and `yt` are known at a station, they still need to be placed
+in 3D. `build_solid_blade()` does this by offsetting the extrados
+(pressure side) and intrados (suction side) surfaces away from the mean
+surface **along a local thickness direction** — the vector math behind
+that direction is worth spelling out explicitly too, because it is the
+one part of the geometry pipeline most likely to look "wrong" if you
+change it without understanding why it's built this way.
+
+### 6.1 What "thickness direction" actually is
+
+The naive approach would be to offset along the mean surface's own full
+normal vector, `N_naive = normalize(Tu × Tv)`, where `Tu` and `Tv` are the
+chordwise and spanwise tangent directions (estimated numerically with
+`np.gradient()`). **This is deliberately NOT what the tool does**,
+because that full normal mixes the chordwise curvature of the profile
+with the blade's spanwise twist rate — offsetting along it makes a thick
+blade visibly "lean sideways" as thickness increases, since the twist
+component grows right along with the thickness offset.
+
+Instead, `compute_thickness_direction()` builds a direction confined to
+the local **chord/circumferential plane**, the same way a 2D airfoil
+section is classically defined before being stacked along the span:
+
+```
+Tu_hat  = normalize(Tu)                              (unit chordwise tangent)
+
+rc      = sqrt(X² + Y²)                              (projected cylindrical radius)
+e_theta = (-Y/rc, X/rc, 0)                            (local circumferential unit vector)
+```
+
+`e_theta` is the tangent to the circle of radius `rc` centred on the Z
+axis at that point — valid for both Kaplan (cylinders) and Deriaz
+(spheres), since both are surfaces of revolution about the Z axis. The
+thickness direction is then `e_theta`, **projected to be exactly
+perpendicular to the chordwise tangent** (a single step of Gram-Schmidt
+orthogonalization):
+
+```
+N = e_theta - (e_theta · Tu_hat) * Tu_hat
+N_thickness = normalize(N)
+```
+
+**Fallback for the degenerate case.** If `e_theta` happens to be nearly
+parallel to `Tu_hat` at some point (so the projection above nearly
+cancels out, `|N| ≈ 0`), the classic full surface normal
+`normalize(Tu × Tv)` is used at that point instead — this only matters at
+isolated, unusual points in the geometry, not across the blade generally.
+
+`build_solid_blade()` then places the two surfaces as:
+
+```
+extrados = mean_surface + (yc·c_i + yt·c_i) * N_thickness
+intrados = mean_surface + (yc·c_i - yt·c_i) * N_thickness
+```
+
+where `c_i` is that station's own chord length (camber shifts both
+surfaces together along `N_thickness`; thickness pushes them apart along
+the same direction).
+
+> **A note on transparency:** the source file also contains a
+> `compute_surface_normals()` function implementing exactly the naive
+> `normalize(Tu × Tv)` approach described above — it is **not called
+> anywhere** in the current pipeline; it's kept in the file purely as a
+> documented reference for why the fix in `compute_thickness_direction()`
+> was needed, and is mentioned here so nothing in the source file is left
+> unexplained.
 
 ---
 
