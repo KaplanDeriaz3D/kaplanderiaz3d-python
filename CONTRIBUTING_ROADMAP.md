@@ -94,7 +94,7 @@ still unverified.
   reference for how to structure this kind of validation study end to
   end) across a matrix of net head, flow rate, and rotational speed
   combinations, including computing the flow Reynolds number for each
-  case, to characterize the efficiency the geometry actually achieves.The geometry for meshing is already one click away: the Export tab's
+  case, to characterize the efficiency the geometry actually achieves. The geometry for meshing is already one click away: the Export tab's
   "Solid Blade (Full)" STL export (`write_stl_ascii()`/`export_cad()`)
   produces a ready-to-mesh watertight blade with no extra preprocessing
   needed.
