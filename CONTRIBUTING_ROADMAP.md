@@ -102,7 +102,7 @@ still unverified.
   guidance behind them at all.
 - **Alternative and validated hydrofoil profiles.** The tool currently
   offers five profile families (see `generate_hydro_profile()` in the
-  source), some NACA-derived [28]. Contributions here fall into two
+  source), some of them NACA-derived [28]. Contributions here fall into two
   categories: (a) implementing genuinely different profile families
   (e.g. profiles specifically developed for hydraulic — not aeronautical
   — applications), and (b) running CFD on the *existing* profiles to
