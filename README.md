@@ -37,7 +37,7 @@ Built as part of a Master's Thesis (TFM) on hydraulic machinery design. See [kap
 ## Requirements
 
 - Python 3.9+
-- Dependencies listed in [`requirements.txt`](requirements.txt): PySide6, PyVista, PyVistaQt, NumPy, openpyxl
+- Dependencies listed in [`Requirements.txt`](Requirements.txt): PySide6, PyVista, PyVistaQt, NumPy, openpyxl
 
 > **Note:** the code is written against PySide6, but is also compatible with PyQt6 with minimal changes (see the note at the top of the source file).
 
@@ -51,7 +51,7 @@ Built as part of a Master's Thesis (TFM) on hydraulic machinery design. See [kap
 ```
 3. Install the dependencies:
 ```bash
-   pip install -r requirements.txt
+   pip install -r Requirements.txt
 ```
 4. Run the app:
 ```bash
