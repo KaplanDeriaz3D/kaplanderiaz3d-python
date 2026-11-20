@@ -4,7 +4,7 @@
 
 <img width="1918" height="948" alt="image" src="https://github.com/user-attachments/assets/46a2c685-c767-4ac7-8a26-f4d6e44b1afe" />
 
-A Python/PySide6 + PyVista port of the original MATLAB App Designer application, for designing runner blades of **Kaplan** (axial-flow) and **Deriaz** (diagonal-flow) hydraulic turbines — no MATLAB license required.
+A Python/PySide6 + PyVista application for designing runner blades of **Kaplan** (axial-flow) and **Deriaz** (diagonal-flow) hydraulic turbines — no MATLAB license required.
 
 Built as part of a Master's Thesis (TFM) on hydraulic machinery design. See [kaplanderiaz3d-theory](https://github.com/KaplanDeriaz3D/kaplanderiaz3d-theory) for the underlying theory and thesis documentation, and [kaplanderiaz3d-matlab](https://github.com/KaplanDeriaz3D/kaplanderiaz3d-matlab) for the original MATLAB version.
 
