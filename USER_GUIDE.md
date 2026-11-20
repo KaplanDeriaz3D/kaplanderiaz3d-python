@@ -482,24 +482,43 @@ the same direction).
 ### Export Manager group
 
 - **Export Geometry** — `Solid Blade (Full)` (extrados + intrados + end
-  caps, a watertight closed mesh) or `Mean Surface Only` (a single
+  caps, a watertight closed solid) or `Mean Surface Only` (a single
   zero-thickness sheet).
-- **CAD Format** — `STL` (triangulated mesh, universally compatible) or
-  `IGES` (a point-cloud fallback writer — **not** a true B-Rep solid; for a
-  real IGES/STEP solid, pass the exported STL through a CAD kernel such as
-  FreeCAD or OpenCASCADE).
-- **Export CAD Geometry** button — opens a save dialog and writes the file.
-  The "Solid Blade (Full)" STL is also the geometry to use for any CFD
-  meshing work — it's watertight and ready to mesh with no further
-  preprocessing.
-- **Export Blade Angles (Excel)** button — writes a two-column `.xlsx`
-  table of inlet/outlet blade angle (`beta1`, `beta2`, in degrees) vs.
-  radius, for feeding into external tools.
+- **CAD Format** — one of:
+  - `STEP` *(default)* — parametric export with exact B-spline (NURBS)
+    surfaces that pass through every computed point, so no curvature is
+    lost to faceting. With OpenCASCADE installed (`pip install
+    cadquery-ocp`), the solid blade is written as a **closed B-Rep solid**
+    that imports directly as a solid body in any CAD package. Without it,
+    the same surfaces are written unsewn and can be knitted into a solid
+    in your CAD tool.
+  - `IGES` — exact B-spline surfaces (IGES 5.3, entity 128), readable by
+    any CAD package; most can knit them into a solid on import.
+  - `STL` — triangulated mesh with consistent outward normals, universally
+    compatible with 3D-printing and meshing tools.
+
+  STEP and IGES are written in **millimetres**; STL is written in
+  **metres**. The turbine axis is the **Z axis** (flow towards −Z): in CAD
+  packages that use a Y-up convention, rotate the part accordingly.
+- **Kernel indicator** — the green line below the format selector shows
+  whether OpenCASCADE was detected, i.e. whether STEP will be exported as a
+  closed solid or as surfaces.
+- **Export CAD Geometry** button — opens a save dialog, writes the file and
+  confirms what was written (closed solid, sewn surfaces or mesh). Only one
+  blade is exported; pattern it `Z` times around the Z axis in your CAD
+  tool to build the full runner. For CFD work, the "Solid Blade (Full)"
+  export (STEP solid or STL) is watertight and ready to mesh with no
+  further preprocessing.
+- **Export Blade Angles (Excel)** button — writes a three-column `.xlsx`
+  table: radius (cylindrical radius for Kaplan, spherical radius for
+  Deriaz, in m) and the inlet/outlet blade angles (`beta1`, `beta2`, in
+  degrees), for feeding into external tools.
 
 Both export buttons are disabled until a geometry has been computed at
 least once.
 
 ---
+
 
 ## 8. 3D Visualization Panel
 
